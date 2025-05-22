@@ -87,10 +87,24 @@ if (!apiKey) {
           content: [
             {
               type: 'text',
-              text: `Analise a imagem fornecida como se você fosse um analista funcional. Gere uma documentação estruturada em dois tópicos principais:
-1. Requisitos Funcionais: liste funcionalidades observadas ou inferidas da interface (por exemplo: campos obrigatórios, ações do usuário, validações esperadas, integrações visíveis).
-2. Requisitos Não Funcionais: destaque aspectos como performance, segurança, responsividade ou dependências externas aparentes.
-Seja objetivo e técnico. A resposta será usada diretamente em um documento técnico.`
+              text: `Analyze the interface shown in the image as a business analyst would.
+
+Your task is to produce detailed and structured documentation, based solely on visual cues.
+
+Return a specification in **two main sections**:
+
+1. **Functional Requirements**
+   - Identify all fields, inputs, buttons, and data groups.
+   - Infer any data models or database tables that are implied (e.g. Customer, Credit, Transaction Categories).
+   - Mention any interaction between components (e.g. lookup fields, dynamic values).
+   - If an embedded table or Excel snippet is visible, describe its relevance to the screen.
+
+2. **Non-Functional Requirements**
+   - Note any visual constraints (layout, fixed columns, scrollable tables).
+   - Performance expectations if you infer calculations or aggregations.
+   - Possible validations or formatting standards (e.g. numeric fields, required names).
+
+**Important:** Be assertive and granular. Imagine you are describing this for someone who needs to recreate the same form in a modern web system.`
             },
             {
               type: 'image_url',
