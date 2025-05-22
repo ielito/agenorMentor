@@ -66,9 +66,10 @@ function toBase64(file) {
 }
 
 async function sendToGPT(base64Image) {
-  const apiKey = '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';
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+const apiKey = localStorage.getItem('openai_api_key');
+if (!apiKey) {
+  throw new Error("API key não encontrada. Por favor, defina em localStorage como 'openai_api_key'.");
+}  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
