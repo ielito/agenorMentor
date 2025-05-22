@@ -1,0 +1,114 @@
+import { generatePDF } from './pdfGenerator.js';
+
+document.getElementById('sendToGPT').addEventListener('click', async () => {
+  const status = document.getElementById('status');
+  const downloadLink = document.getElementById('downloadLink');
+  const input = document.getElementById('imageInput');
+  const file = input.files[0];
+  const button = document.getElementById('sendToGPT');
+  button.disabled = true;
+
+  if (!file) {
+    status.textContent = 'Por favor, selecione uma imagem.';
+    button.disabled = false;
+    return;
+  }
+
+  status.textContent = 'Processando imagem...';
+
+  try {
+    const base64 = await toBase64(file);
+    const description = await sendToGPT(base64);
+
+    if (!description) {
+      status.textContent = 'Erro ao gerar descrição (resposta vazia).';
+      button.disabled = false;
+      return;
+    }
+
+    status.textContent = 'Descrição gerada! Gerando arquivo...';
+
+    const blob = await generatePDF(description);
+    const url = URL.createObjectURL(blob);
+
+    downloadLink.href = url;
+    downloadLink.download = 'descricao.pdf';
+    downloadLink.textContent = 'Clique aqui para baixar';
+    downloadLink.style.display = 'block';
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: 'uploadFile',
+        file: {
+          content: description,
+          name: 'descricao.pdf',
+          type: 'application/pdf'
+        }
+      });
+    });
+
+    status.textContent = 'Pronto!';
+  } catch (err) {
+    status.textContent = `Erro: ${err.message}`;
+    console.error(err);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function sendToGPT(base64Image) {
+  const apiKey = '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';
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'Você é um assistente que descreve imagens técnicas de interfaces e sugere funcionalidades.'
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analise a imagem fornecida como se você fosse um analista funcional. Gere uma documentação estruturada em dois tópicos principais:
+1. Requisitos Funcionais: liste funcionalidades observadas ou inferidas da interface (por exemplo: campos obrigatórios, ações do usuário, validações esperadas, integrações visíveis).
+2. Requisitos Não Funcionais: destaque aspectos como performance, segurança, responsividade ou dependências externas aparentes.
+Seja objetivo e técnico. A resposta será usada diretamente em um documento técnico.`
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/png;base64,${base64Image}`
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 1000
+    })
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Erro ${response.status}: ${errorBody}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content;
+}

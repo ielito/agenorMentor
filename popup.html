@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Descrever Imagem com GPT</title>
+    <style>
+      body { font-family: sans-serif; padding: 20px; width: 300px; }
+      button, input[type="file"] { margin-top: 10px; display: block; width: 100%; }
+      #status { margin-top: 10px; }
+      #downloadLink { display: block; margin-top: 10px; }
+    </style>
+    <script src="libs/jspdf.umd.min.js"></script>
+    <script type="module" src="popup.js"></script>
+  </head>
+<body>
+  <h3>Descrever imagem</h3>
+  <input type="file" id="imageInput" accept="image/*" />
+  <button id="sendToGPT">Gerar Descrição</button>
+  <p id="status"></p>
+  <a id="downloadLink" style="display:none;">Baixar arquivo</a>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
