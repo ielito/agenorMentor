@@ -80,31 +80,30 @@ if (!apiKey) {
       messages: [
         {
           role: 'system',
-          content: 'Você é um assistente que descreve imagens técnicas de interfaces e sugere funcionalidades.'
+          content: 'You are a systems analyst. Analyze the set of screens below as a single user flow.'
         },
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: `Analyze the interface shown in the image as a business analyst would.
+              text: `These screenshots represent different steps in a business flow. Identify connections, transitions, and data relationships between them. Be structured and separate the output into Functional Requirements and Non-Functional Requirements.
+                    Your task is to produce detailed and structured documentation, based solely on visual cues.
+                    Return a specification in **two main sections**:
 
-Your task is to produce detailed and structured documentation, based solely on visual cues.
+                    1. **Functional Requirements**
+                      - Identify all fields, inputs, buttons, and data groups.
+                      - Infer any data models or database tables that are implied (e.g. Customer, Credit, Transaction Categories).
+                      - Mention any interaction between components (e.g. lookup fields, dynamic values).
+                      - If an embedded table or Excel snippet is visible, describe its relevance to the screen.
 
-Return a specification in **two main sections**:
+                    2. **Non-Functional Requirements**
+                      - Note any visual constraints (layout, fixed columns, scrollable tables).
+                      - Performance expectations if you infer calculations or aggregations.
+                      - Possible validations or formatting standards (e.g. numeric fields, required names).
 
-1. **Functional Requirements**
-   - Identify all fields, inputs, buttons, and data groups.
-   - Infer any data models or database tables that are implied (e.g. Customer, Credit, Transaction Categories).
-   - Mention any interaction between components (e.g. lookup fields, dynamic values).
-   - If an embedded table or Excel snippet is visible, describe its relevance to the screen.
-
-2. **Non-Functional Requirements**
-   - Note any visual constraints (layout, fixed columns, scrollable tables).
-   - Performance expectations if you infer calculations or aggregations.
-   - Possible validations or formatting standards (e.g. numeric fields, required names).
-
-**Important:** Be assertive and granular. Imagine you are describing this for someone who needs to recreate the same form in a modern web system.`
+                    **Important:** Be assertive and granular. Imagine you are describing this for someone who needs to recreate the same form in a modern web system.`
+                    
             },
             {
               type: 'image_url',
