@@ -7,6 +7,7 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
   const file = input.files[0];
   const button = document.getElementById('sendToGPT');
   button.disabled = true;
+  button.classList.add('loading');
 
   if (!file) {
     status.textContent = 'Por favor, selecione uma imagem.';
@@ -53,6 +54,7 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
     console.error(err);
   } finally {
     button.disabled = false;
+    button.classList.remove('loading');
   }
 });
 
