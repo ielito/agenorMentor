@@ -1,1 +1,1 @@
-// Por enquanto vazio. Necessário pelo manifest V3.
+// Only for Manifest v3

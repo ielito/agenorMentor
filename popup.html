@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Descrever Imagem com GPT</title>
+  <title>Analyze System Screen with AI</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -89,16 +89,29 @@
     #downloadLink:hover {
       text-decoration: underline;
     }
+
+        .info {
+      font-size: 12px;
+      color: #666;
+      margin-top: 16px;
+      text-align: left;
+      line-height: 1.5;
+    }
   </style>
   <script src="libs/jspdf.umd.min.js"></script>
   <script type="module" src="popup.js"></script>
 </head>
 <body>
   <img class="logo" src="https://logos-download.com/wp-content/uploads/2020/07/OutSystems_Logo.png" alt="OutSystems logo" />
-  <h3>Descrever Imagem com GPT</h3>
+  <h3>Analyze System Screen with AI</h3>
   <input type="file" id="imageInput" accept="image/*" multiple />
-  <button id="sendToGPT">Gerar Descrição</button>
-  <p id="status"></p>
-  <a id="downloadLink" style="display:none;">Baixar Arquivo</a>
+  <button id="sendToGPT">Describe Flow with GPT</button>
+  <div id="status" class="status-box">🧠 Awaiting input...</div>
+  <a id="downloadLink" style="display:none;">Download pdf File</a>
+  <p class="info">
+    💡 This tool uses GPT to interpret screen images.<br>
+    Results may not be 100% accurate and should be reviewed.<br>
+    You can upload multiple screenshots to analyze a full flow.
+  </p>
 </body>
 </html>

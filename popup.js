@@ -20,26 +20,26 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
   button.classList.add('loading');
 
   if (!files.length) {
-    status.textContent = 'Por favor, selecione ao menos uma imagem.';
+    status.textContent = 'Please select at least one image.';
     button.disabled = false;
     button.classList.remove('loading');
     return;
   }
 
-  status.textContent = 'Processando imagens...';
+  status.textContent = 'Processing images...';
 
   try {
     let base64Images = [];
     try {
       base64Images = await toBase64All(files);
     } catch (err) {
-      status.textContent = 'Erro ao converter imagens para base64.';
+      status.textContent = 'Failed to convert images to base64.';
       console.error('Erro na conversão de base64:', err);
       return;
     }
 
     if (!base64Images.length) {
-      status.textContent = 'Nenhuma imagem foi processada.';
+      status.textContent = 'No images were processed.';
       return;
     }
 
@@ -47,11 +47,11 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
     const description = await sendToGPT(base64Images);
 
     if (!description) {
-      status.textContent = 'Erro ao gerar descrição (resposta vazia).';
+      status.textContent = 'Error generating description (empty response).';
       return;
     }
 
-    status.textContent = 'Descrição gerada! Gerando PDF...';
+    status.textContent = 'Description generated! Creating PDF...';
 
     //const blob = await generatePDF(description);
     const blob = await generatePDF(description, base64Images);
@@ -59,12 +59,12 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
 
     downloadLink.href = url;
     downloadLink.download = 'descricao.pdf';
-    downloadLink.textContent = 'Clique aqui para baixar';
+    downloadLink.textContent = 'Click here to download';
     downloadLink.style.display = 'block';
 
-    status.textContent = 'Pronto!';
+    status.textContent = 'Done!';
   } catch (err) {
-    status.textContent = `Erro: ${err.message}`;
+    status.textContent = `Error: ${err.message}`;
     console.error(err);
   } finally {
     button.disabled = false;
@@ -75,7 +75,7 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
 async function sendToGPT(base64Images) {
   const apiKey = localStorage.getItem('openai_api_key');
   if (!apiKey) {
-    throw new Error("API key não encontrada. Por favor, defina em localStorage como 'openai_api_key'.");
+    throw new Error("API key not found. Please set it in localStorage as 'openai_api_key'.");
   }
 
   const messages = [
@@ -88,25 +88,26 @@ async function sendToGPT(base64Images) {
       content: [
         {
           type: 'text',
-          text: `These screenshots represent different steps in a user flow.
+          text: `The following image represents the business flow of an application.
 
-Please:
-- Identify which screen navigates to which (Screen A → Screen B)
-- Detect if parameters are passed (e.g., CustomerId, OrderId)
-- Suggest the type of transition (modal, full screen, master-detail)
-- Highlight any inconsistencies or redundancies
+Please analyze it and respond using the following structure:
 
-Structure your answer as:
+## App Purpose and Overview
+(Summarize what the app is for)
 
-## Navigation Flow
-- Screen A → Screen B (via 'Edit' button)
-- Screen B → Screen C (via 'Save', passes CustomerId)
+## Entities and Attributes
+(List entities with attributes like: EntityName: Attribute1, Attribute2, ...)
 
-## Observations
-- Suggest modal for screen C to avoid full reload
-- Data seems reused between A and B
+## Roles and Permissions
+(Define roles and their access to data/screens)
 
-If the screenshots show no clear link, say so.`
+## Workflow States
+(Identify any process steps or statuses involved)
+
+## Functional Requirements
+(Summarize key features and behaviors, especially those related to UI, integrations, and automation)
+
+If some information is not clear from the image, try to infer based on typical enterprise app logic. Be concise and avoid code or UI design suggestions.`
         },
         ...base64Images.map(img => ({
           type: 'image_url',
@@ -131,7 +132,7 @@ If the screenshots show no clear link, say so.`
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Erro ${response.status}: ${errorBody}`);
+    throw new Error(`Error ${response.status}: ${errorBody}`);
   }
 
   const data = await response.json();

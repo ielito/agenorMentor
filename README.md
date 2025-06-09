@@ -1,21 +1,24 @@
 # 🧠 Agenor Mentor — GPT Image Describer Chrome Extension
 
-This Chrome Extension transforms **screenshots of legacy systems** (e.g. Oracle Forms, SAP, internal tools) into **structured technical documentation** using OpenAI GPT-4o.
+This Chrome Extension transforms **screenshots of system flows** into **structured requirement documents** optimized for OutSystems AI Mentor (App Generator).
 
 ---
 
 ## 🚀 Features
 
-- 📸 Upload **one or more screenshots** of system interfaces
-- 🧠 GPT analyzes:
-  - Navigation flow between screens
+- 📸 Upload **one or more screenshots** (e.g., user flows, wireframes)
+- 🧠 GPT analyzes and generates:
+  - App Purpose & Overview
+  - Entities and Attributes
+  - Roles and Permissions
+  - Workflow States
   - Functional Requirements
-  - Non-Functional Requirements
-- 🧾 Generates a downloadable PDF document with:
-  - GPT’s structured response
-  - The original images included
-- 🔐 API Key securely stored via `chrome.storage`
-- 🧩 Fully client-side, no backend required
+- 🧾 Downloadable PDF includes both:
+  - Structured GPT output
+  - The original screenshots (each on a separate page)
+- 💡 Follows the best practices for prompt-based generation via Mentor
+- 🔐 API Key stored securely via `localStorage`
+- 🧩 Fully client-side — no backend or server required
 
 ---
 
@@ -26,17 +29,15 @@ This Chrome Extension transforms **screenshots of legacy systems** (e.g. Oracle 
 1. Go to `chrome://extensions`
 2. Enable **Developer Mode**
 3. Click **“Load unpacked”**
-4. Select the extension folder (`aiplugin`)
+4. Select the folder where this project lives
 
 ---
 
-### 2. Configure your OpenAI API Key
+### 2. Set your OpenAI API Key
 
-1. Go to [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
-2. Create a new key (must support `gpt-4o`)
-3. Open the extension in Chrome
-4. Paste the key in the `API Key` field and click **Save Key** (if UI available)  
-   Or use DevTools console:
+1. Get your key from [OpenAI platform](https://platform.openai.com/account/api-keys)
+2. Open DevTools Console inside the popup
+3. Set your key:
 
 ```js
 localStorage.setItem('openai_api_key', 'sk-...');
@@ -44,21 +45,12 @@ localStorage.setItem('openai_api_key', 'sk-...');
 
 ---
 
-### 3. Generate your documentation
+### 3. Generate your document
 
-1. Select **one or more screenshots**
-2. Click **Generate Description**
-3. GPT analyzes the image(s) and generates:
-   - Textual description with flow and requirements
-   - PDF containing both text and screenshots
-4. Click **Download File**
-
----
-
-## 🔐 Security
-
-- The OpenAI key is **not hardcoded**
-- It is securely stored via `chrome.storage.local`
+1. Upload one or more screenshots
+2. Click **Analyze Screens**
+3. Wait for the GPT-powered response
+4. Download the PDF file
 
 ---
 
@@ -66,9 +58,9 @@ localStorage.setItem('openai_api_key', 'sk-...');
 
 ```
 aiplugin/
-├── popup.html              # User interface with style and animation
-├── popup.js                # Handles multiple image input, GPT calls, and PDF generation
-├── pdfGenerator.js         # Creates multipage PDF (text + screenshots)
+├── popup.html              # UI layout and styles
+├── popup.js                # Logic for GPT flow + PDF generation
+├── pdfGenerator.js         # Builds PDF with description + images
 ├── libs/
 │   └── jspdf.umd.min.js    # PDF library
 ├── manifest.json           # Chrome extension config
@@ -77,20 +69,9 @@ aiplugin/
 
 ---
 
-## 📦 Roadmap
-
-- [ ] Export `.txt` option
-- [ ] Response history
-- [ ] Autofill descriptions into page fields
-- [ ] Auto-upload to target platform
-- [ ] Prompt selector and model configuration
-
----
-
 ## 🤝 Contributing
 
-Pull requests are welcome!  
-Got ideas? Open an issue or ping me over coffee ☕.
+Pull requests are welcome — especially if you're into prompt engineering, UI/UX or AI integrations. Let’s improve Mentor-powered dev together 🚀
 
 ---
 
