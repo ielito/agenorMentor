@@ -6,12 +6,15 @@ This Chrome Extension transforms **screenshots of legacy systems** (e.g. Oracle 
 
 ## 🚀 Features
 
-- 📸 **Upload screenshots of UI interfaces**
-- 🧠 **GPT analyzes and describes the interface**
+- 📸 Upload **one or more screenshots** of system interfaces
+- 🧠 GPT analyzes:
+  - Navigation flow between screens
   - Functional Requirements
   - Non-Functional Requirements
-- 🧾 **Generates a downloadable PDF document**
-- 🔐 **API Key securely stored via `chrome.storage`**
+- 🧾 Generates a downloadable PDF document with:
+  - GPT’s structured response
+  - The original images included
+- 🔐 API Key securely stored via `chrome.storage`
 - 🧩 Fully client-side, no backend required
 
 ---
@@ -32,15 +35,22 @@ This Chrome Extension transforms **screenshots of legacy systems** (e.g. Oracle 
 1. Go to [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
 2. Create a new key (must support `gpt-4o`)
 3. Open the extension in Chrome
-4. Paste the key in the `API Key` field and click **Save Key**
+4. Paste the key in the `API Key` field and click **Save Key** (if UI available)  
+   Or use DevTools console:
+
+```js
+localStorage.setItem('openai_api_key', 'sk-...');
+```
 
 ---
 
 ### 3. Generate your documentation
 
-1. Upload a screenshot
+1. Select **one or more screenshots**
 2. Click **Generate Description**
-3. GPT analyzes the image and generates a PDF
+3. GPT analyzes the image(s) and generates:
+   - Textual description with flow and requirements
+   - PDF containing both text and screenshots
 4. Click **Download File**
 
 ---
@@ -56,9 +66,9 @@ This Chrome Extension transforms **screenshots of legacy systems** (e.g. Oracle 
 
 ```
 aiplugin/
-├── popup.html              # User interface
-├── popup.js                # Main logic (upload, GPT, PDF)
-├── pdfGenerator.js         # PDF generation using jsPDF
+├── popup.html              # User interface with style and animation
+├── popup.js                # Handles multiple image input, GPT calls, and PDF generation
+├── pdfGenerator.js         # Creates multipage PDF (text + screenshots)
 ├── libs/
 │   └── jspdf.umd.min.js    # PDF library
 ├── manifest.json           # Chrome extension config
@@ -73,6 +83,7 @@ aiplugin/
 - [ ] Response history
 - [ ] Autofill descriptions into page fields
 - [ ] Auto-upload to target platform
+- [ ] Prompt selector and model configuration
 
 ---
 

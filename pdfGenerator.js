@@ -1,4 +1,4 @@
-export async function generatePDF(text) {
+export async function generatePDF(text, images = []) {
   const jsPDF = window.jspdf?.jsPDF;
   if (!jsPDF) throw new Error("jsPDF não carregado.");
 
@@ -16,6 +16,11 @@ export async function generatePDF(text) {
     doc.text(line, margin, y);
     y += 10;
   });
+
+  for (const base64 of images) {
+    doc.addPage();
+    doc.addImage(`data:image/png;base64,${base64}`, 'PNG', 10, 20, 190, 160);
+  }
 
   return doc.output('blob');
 }

@@ -1,52 +1,66 @@
 import { generatePDF } from './pdfGenerator.js';
 
+function toBase64All(files) {
+  const promises = Array.from(files).map(file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  }));
+  return Promise.all(promises);
+}
+
 document.getElementById('sendToGPT').addEventListener('click', async () => {
   const status = document.getElementById('status');
   const downloadLink = document.getElementById('downloadLink');
   const input = document.getElementById('imageInput');
-  const file = input.files[0];
+  const files = input.files;
   const button = document.getElementById('sendToGPT');
   button.disabled = true;
   button.classList.add('loading');
 
-  if (!file) {
-    status.textContent = 'Por favor, selecione uma imagem.';
+  if (!files.length) {
+    status.textContent = 'Por favor, selecione ao menos uma imagem.';
     button.disabled = false;
+    button.classList.remove('loading');
     return;
   }
 
-  status.textContent = 'Processando imagem...';
+  status.textContent = 'Processando imagens...';
 
   try {
-    const base64 = await toBase64(file);
-    const description = await sendToGPT(base64);
-
-    if (!description) {
-      status.textContent = 'Erro ao gerar descrição (resposta vazia).';
-      button.disabled = false;
+    let base64Images = [];
+    try {
+      base64Images = await toBase64All(files);
+    } catch (err) {
+      status.textContent = 'Erro ao converter imagens para base64.';
+      console.error('Erro na conversão de base64:', err);
       return;
     }
 
-    status.textContent = 'Descrição gerada! Gerando arquivo...';
+    if (!base64Images.length) {
+      status.textContent = 'Nenhuma imagem foi processada.';
+      return;
+    }
 
-    const blob = await generatePDF(description);
+    console.log('Base64 convertido:', base64Images);
+    const description = await sendToGPT(base64Images);
+
+    if (!description) {
+      status.textContent = 'Erro ao gerar descrição (resposta vazia).';
+      return;
+    }
+
+    status.textContent = 'Descrição gerada! Gerando PDF...';
+
+    //const blob = await generatePDF(description);
+    const blob = await generatePDF(description, base64Images);
     const url = URL.createObjectURL(blob);
 
     downloadLink.href = url;
     downloadLink.download = 'descricao.pdf';
     downloadLink.textContent = 'Clique aqui para baixar';
     downloadLink.style.display = 'block';
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: 'uploadFile',
-        file: {
-          content: description,
-          name: 'descricao.pdf',
-          type: 'application/pdf'
-        }
-      });
-    });
 
     status.textContent = 'Pronto!';
   } catch (err) {
@@ -58,20 +72,51 @@ document.getElementById('sendToGPT').addEventListener('click', async () => {
   }
 });
 
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+async function sendToGPT(base64Images) {
+  const apiKey = localStorage.getItem('openai_api_key');
+  if (!apiKey) {
+    throw new Error("API key não encontrada. Por favor, defina em localStorage como 'openai_api_key'.");
+  }
 
-async function sendToGPT(base64Image) {
-const apiKey = localStorage.getItem('openai_api_key');
-if (!apiKey) {
-  throw new Error("API key não encontrada. Por favor, defina em localStorage como 'openai_api_key'.");
-}  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const messages = [
+    {
+      role: 'system',
+      content: 'You are a UX and logic analyst for enterprise apps built with OutSystems. Your task is to analyze a series of screens and describe their navigation flow.'
+    },
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: `These screenshots represent different steps in a user flow.
+
+Please:
+- Identify which screen navigates to which (Screen A → Screen B)
+- Detect if parameters are passed (e.g., CustomerId, OrderId)
+- Suggest the type of transition (modal, full screen, master-detail)
+- Highlight any inconsistencies or redundancies
+
+Structure your answer as:
+
+## Navigation Flow
+- Screen A → Screen B (via 'Edit' button)
+- Screen B → Screen C (via 'Save', passes CustomerId)
+
+## Observations
+- Suggest modal for screen C to avoid full reload
+- Data seems reused between A and B
+
+If the screenshots show no clear link, say so.`
+        },
+        ...base64Images.map(img => ({
+          type: 'image_url',
+          image_url: { url: `data:image/png;base64,${img}` }
+        }))
+      ]
+    }
+  ];
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -79,44 +124,8 @@ if (!apiKey) {
     },
     body: JSON.stringify({
       model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a systems analyst. Analyze the set of screens below as a single user flow.'
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `These screenshots represent different steps in a business flow. Identify connections, transitions, and data relationships between them. Be structured and separate the output into Functional Requirements and Non-Functional Requirements.
-                    Your task is to produce detailed and structured documentation, based solely on visual cues.
-                    Return a specification in **two main sections**:
-
-                    1. **Functional Requirements**
-                      - Identify all fields, inputs, buttons, and data groups.
-                      - Infer any data models or database tables that are implied (e.g. Customer, Credit, Transaction Categories).
-                      - Mention any interaction between components (e.g. lookup fields, dynamic values).
-                      - If an embedded table or Excel snippet is visible, describe its relevance to the screen.
-
-                    2. **Non-Functional Requirements**
-                      - Note any visual constraints (layout, fixed columns, scrollable tables).
-                      - Performance expectations if you infer calculations or aggregations.
-                      - Possible validations or formatting standards (e.g. numeric fields, required names).
-
-                    **Important:** Be assertive and granular. Imagine you are describing this for someone who needs to recreate the same form in a modern web system.`
-                    
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/png;base64,${base64Image}`
-              }
-            }
-          ]
-        }
-      ],
-      max_tokens: 1000
+      messages,
+      max_tokens: 2000
     })
   });
 
