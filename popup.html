@@ -104,14 +104,14 @@
 <body>
   <img class="logo" src="https://logos-download.com/wp-content/uploads/2020/07/OutSystems_Logo.png" alt="OutSystems logo" />
   <h3>Analyze System Screen with AI</h3>
-  <input type="file" id="imageInput" accept="image/*" multiple />
-  <button id="sendToGPT">Describe Flow with GPT</button>
+  <input id="imageInput" type="file" accept=".png,.jpg,.jpeg,.java,.cs,.ts,.json,.xml,.tx,.js" multiple />
+  <button id="sendToGPT">Analyze Files with GPT</button>
   <div id="status" class="status-box">🧠 Awaiting input...</div>
   <a id="downloadLink" style="display:none;">Download pdf File</a>
   <p class="info">
-    💡 This tool uses GPT to interpret screen images.<br>
-    Results may not be 100% accurate and should be reviewed.<br>
-    You can upload multiple screenshots to analyze a full flow.
+    💡 This tool uses GPT to interpret screen images and source code files.<br>
+       Results may not be 100% accurate and should be reviewed.<br>
+       You can upload multiple files to analyze full flows and logic structures.
   </p>
 </body>
 </html>
